@@ -1,0 +1,24 @@
+= Options.dat file
+= after changing this file restart the app
+==========================================
+= font
+= font size
+= font color
+= text line height
+= background color of app
+= background color of editing area
+= App window WIDTH on startup
+= App window HEIGHT on startup
+= text editor
+= file manager
+============== Edit Below Here ==============
+Arial
+11pt
+#016
+125%
+#abc
+#dee
+700
+700
+notepad
+explorer
