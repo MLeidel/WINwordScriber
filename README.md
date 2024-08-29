@@ -20,14 +20,29 @@ In the Windows version of this project pywebview
 uses _WebView2_ (part of Edge). In Windows testing
 spell checking does work in a limited fashion. 
 
-Also this Linux version has some extra code 
-to force the tkinter dialogs to open on the correct screen
-of a dual monitor setup. If you are using a single monitor, 
-then remove the indicated code from wsr.py.
+---
+
+## How to install on Windows
+
+__First install Python:__  
+-   from command prompt: winget install Python (winget may not work)  
+-   or from Internet _https://www.python.org/downloads/_
+-   or from MS Store "python"  
+
+__from command prompt:__
+- `pip install pywebview`
+
+__Only if Edge has been uninstalled
+then run this:__  
+-   MicrosoftEdgeWebView2RuntimeInstallerX64.exe
+
+__Lastly run:__
+-   Setup_wsr.exe
+
+---
 
 The purpose of this project is to demonstrate how the pywebview module 
 provides communication between Python/tkinter and HTML/Javascript.
 
 
 ![alttext](images/wsr_git.png "wordScriber")
-
