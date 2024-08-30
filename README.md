@@ -1,112 +1,49 @@
-Package Control Messages
-========================
+# wordScriber
 
-Package Control
----------------
+__HTML local document editor__  
+Windows version
 
-  Version 4.0.0 Release Notes
-  ===========================
+This project demonstrates how to create apps that 
+combine a python module (tkinter) and an HTML GUI 
+in an offline desktop situation. In this case the 
+focus is on using HTML to edit, create, and format
+HTML documents. Here pywebview provides communication between
+Python/tkinter and HTML/Javascript.
 
+There are certain limitations depending on the web engine
+and API employed. Web engines used outside of an Internet 
+browser may be missing features found in the browser versions.
+In the Windows version pywebview (_WebView2_) is provides HTML rendering.
+In the Linux version pywebview uses _WebKitGTK_.
 
-  Major Changes
-  -------------
+In the Windows version of this project pywebview
+uses _WebView2_ (part of Edge). WebView2 supports
+spell checking in a limited fashion. 
 
-  - Requires at least ST3143 (1.0)
+---
 
-  - drops support for python 2.x
+## How to install on Windows
 
-  - adds support for python 3.8
+__First install Python:__  
+-	from command prompt: winget install Python (winget may not work)  
+-	or from Internet _https://www.python.org/downloads/_
+-	or from MS Store "python"  
 
-  - Package and library version scheme changed from SemVer to PEP440
-    for better pre-release handling and compatibility with python packages.
+__from command prompt:__
+- `pip install pywebview`
 
-    Note: Package versions should still follow SemVer like `<major>.<minor>.<micro>`
+__Install the Edge runtime__
+-	MicrosoftEdgeWebView2RuntimeInstallerX64.exe
 
-  - Dependencies are now called libraries.
+__Lastly run:__
+-	Setup_wsr.exe
+- or clone this repository
 
-    They are installed to Data/Libs as ordinary python packages.
+---
 
-    Existing managed dependencies are automatically converted.
-
-    Can install python wheels (*.whl)
-
-  - Channel/repository scheme v1.0 and v1.2 are no longer supported
-    as they contain only packages for no longer supported ST2.
-
-  - New channel/repository scheme v4.0.0 is introduced,
-    which allows to specify supported `python_versions`.
-
-    Parsing and installing "requirements.txt" is however not yet supported.
-
-    For working examples checkout example-channel.json and example-repository.json
-    from Package Control Github repository.
-
-
-  Note for Package Devs
-  ---------------------
-
-    packagecontrol.io does not yet support the new 4.0.0 scheme
-    and thus doesn't ship python 3.8 dependencies/libraries.
-
-    Therefore do not upgrade repositories to 4.0.0 scheme,
-    which are included in default channel.
-
-    You can however create your own 4.0.0 repository and
-    add it via 'Package Control: Add Repository'.
-
-    Metadata for python 3.8 compatible libraries are maintained at
-
-      https://github.com/packagecontrol/channel
-
-    and shipped via
-
-      https://packagecontrol.github.io/channel/channel_v4.json
-
-    so all packages can already migrate to python 3.8
+The purpose of this project is to demonstrate how the pywebview module 
+provides communication between Python/tkinter and HTML/Javascript.
 
 
-  New features include:
-  ---------------------
+![alttext](images/wsr_git.png "wordScriber")
 
-    - support for python 3.8 dependencies (now called libraries)
-    - add openssl 3.0 support via asn1crypto 1.5.1 and oscrypto 1.3.0
-    - prune backups older than 14 days (#145)
-    - provide all relevant operations via ApplicationCommands (#1071)
-      + Advanced Disable Packages (disable_packages)
-      + Advanced Enable Packages (enable_packages)
-      + Advanced Install Packages (install_packages)
-      + Advanced Upgrade Packages (upgrade_packages)
-      + Advanced Remove Packages (remove_packages)
-    - allow relative paths in channel.json and repository.json (#1329)
-    - hide (auto-generated?) packages via `.hidden-sublime-package` file (#1429)
-    - support for cooperate_packages (#1406, #1633)
-    - IntelliSense support for for channel.json/repository.json via jsonschemas
-    - support for asset based Github/Gitlab releases (#1484)
-
-
-  Bug fixes include:
-  ------------------
-
-    - abort package operation if backup fails (#1000)
-    - fix long path support on Windows (#1020)
-    - fix missing packages not being installed if an overriding unpacked package exists (#1155)
-    - fix errors being displayed for git/hg tracked packages without remote (#1167)
-    - fix not all git/hg tracked packages being upgraded
-    - fix packages in auto_upgrade_ignore setting being renamed without upgrade (#1370)
-    - fix corruption of installed_packages or ignored_packages settings
-    - fix backup/restore of ST's "auto" color schemes and themes
-    - fix manual package upgrades converting unmanaged packages to managed ones (#1272)
-    - fix libraries not being upgraded by auto upgrader
-    - fix prompt for ST restart before all operations are completed
-    - fix SSL_CERT_FILE environment variable being ignored
-    - fix repositories of channels without cache not being downloaded (#1354, #1601)
-    - fix QuickPanelItem parse errors in URLs (#1580)
-    - fix unavailable libraries being reported as successfully installed (#1605)
-    - fix error message flooding
-    - keep ingored_packages clean by removing non-existing packages
-
-    ...
-
-    The full list of addressed bugs can be found at:
-
-      https://github.com/wbond/package_control/milestone/1
