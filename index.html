@@ -98,6 +98,8 @@ class RichTX {
       t = t.replace(/<\/ol>/g, "\n</ol>\n");
       t = t.replace(/<li/g, "\n   <li");
       t = t.replace(/\n\n/g, "\n"); // clean up extra blank lines
+      t = t.replace(/  /g, ""); // clean up extra spaces lines
+      t = t.replace(/\t/g, ""); // clean up extra tabs
       return t;
   }
 
@@ -270,6 +272,11 @@ class RichTX {
   .imgbutton:hover {
     background-color: white;
   }
+  dialog {
+    background: #ddd;
+    border: thin solid black;
+    border-radius: 10px;
+  }
 
 </style>
 
@@ -280,11 +287,28 @@ class RichTX {
 &nbsp;&nbsp;&nbsp;<input type="text" id="FN" size=50>
 <span id="SAV">Saved</span>
 <br>
+<dialog id="d2">
+  <p>
+    Text Color<br>
+    click:
+    <input type="color" id="c2" value="#888899">
+  </p>
+    <input type="button" onclick="getColor('#c2','#d2')" value="Accept">
+</dialog>
+<dialog id="d1">
+  <p>
+    Highlight Color<br>
+    click:
+    <input type="color" id="c1" value="#888899">
+  </p>
+    <input type="button" onclick="getColor('#c1','#d1')" value="Accept">
+</dialog>
 
 <div id="RTX1"> <!-- The document space -->
 
 </div><br><center>
 
+<div id="BTN">
   <img class="imgbutton" src="icons/open.png" title="Open File"
       onclick="openFile()" />&nbsp;
   <img class="imgbutton" src="icons/html.png"
@@ -303,20 +327,25 @@ class RichTX {
       onclick="RTXexec('fontSize', ask('Enter Font Size (small) 1-7 (big)', 1))" />&nbsp;
   <img class="imgbutton" src="icons/link_small.png"
       onclick="RTXexec('createLink', ask('Enter URL for Link:', 5))"
-            title="Make Link" />&nbsp; <!--create a link from selected text-->
+            title="Make Link" />&nbsp;
   <img class="imgbutton" src="icons/fonts.png"
       onclick="RTXexec('fontName', ask('Enter System Font Name:', 2))"
-            title="font name" />&nbsp; <!-- changes font for selected text-->
+            title="font name" />&nbsp;
   <img class="imgbutton" src="icons/textcolor.png"
-      onclick="RTXexec('foreColor', ask('Enter Text Color:', 3))"
-            title="text color" />&nbsp; <!-- changes color for selected text-->
+      onclick="JS.dlgOpen('#d1')" title="text color" />&nbsp;
+      <!-- onclick="RTXexec('foreColor', xxxxxxxxxx)" -->
+
+  <img class="imgbutton" src="icons/indent.png" title="indent (Alt-i)"
+      onclick="RTXexec('indent')" />&nbsp;
   <br>
-    <img class="imgbutton" src="icons/save.png" title="Save (quick)"
+    <img class="imgbutton" src="icons/save.png" title="Save (Ctrl-s)"
       onclick="quicksaveDocument()" />&nbsp;
     <img class="imgbutton" src="icons/image.png" title="Insert Image"
       onclick="insertImage()" />&nbsp;
     <img class="imgbutton" src="icons/highlighter.png" title="Hilite Color"
-      onclick="RTXexec('hiliteColor', ask('Enter color for highlighting:', 4))" />&nbsp;
+      onclick="JS.dlgOpen('#d2');" />&nbsp;
+      <!-- onclick="RTXexec('hiliteColor', xxxxxxxxxxxxxxx)"-->
+
     <img class="imgbutton" src="icons/lists.png" title="List"
       onclick="RTXexec('insertUnorderedList')" />&nbsp;
     <img class="imgbutton" src="icons/format_list_numbered.png" title="Numbered List"
@@ -333,6 +362,8 @@ class RichTX {
       onclick="RTXexec('formatBlock', '<h2>')" />&nbsp;
     <img class="imgbutton" src="icons/h3.png" title="heading size"
       onclick="RTXexec('formatBlock', '<h3>')" />&nbsp;
+    <img class="imgbutton" src="icons/outdent.png" title="outdent (Alt-o)"
+      onclick="RTXexec('outdent')" />&nbsp;
   <br>
     <img class="imgbutton" src="icons/save_as.png" title="Save-As"
       onclick="saveDocument()" />&nbsp;
@@ -351,9 +382,11 @@ class RichTX {
     <img class="imgbutton" src="icons/settings.png" title="Options Edit"
       onclick="launch_editor()" />&nbsp;
     <img class="imgbutton" src="icons/spell.png" title="Spell Check"
-      onclick="spellCheck();" />&nbsp;
+      onclick="getWords()" />&nbsp;
     <img class="imgbutton" src="icons/close.png" title="Close Application"
       onclick="getDocStatus()" />&nbsp;
+  <br>
+</div>
 
 </center>
 
@@ -401,6 +434,17 @@ function insertImage() {
      NOTE: the graphic must have an Internet URL */
   let url = ask("Enter relative URL for image", 6);
   if (url) RTXexec("insertHTML", `<img src='${url}' width=""  height=""  />`);
+}
+
+function getColor(cid, did) {
+  /* needs both color type ID and dialog ID */
+  var chosenColor = JS.val(cid);
+  //console.log('Chosen Color:', chosenColor);
+  // actions
+  if (did == "#d2") RTXexec('hiliteColor', chosenColor);
+  if (did == "#d1") RTXexec('foreColor', chosenColor);
+  // close the dialog
+  JS.doq(did).close();
 }
 
 /* File loading & Saving Logic */
