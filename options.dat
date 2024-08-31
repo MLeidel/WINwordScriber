@@ -7,8 +7,6 @@
 = text line height
 = background color of app
 = background color of editing area
-= App window WIDTH on startup
-= App window HEIGHT on startup
 = text editor
 = file manager
 ============== Edit Below Here ==============
@@ -18,7 +16,5 @@ Arial
 125%
 #abc
 #dee
-700
-700
 notepad
 explorer

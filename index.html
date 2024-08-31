@@ -168,8 +168,6 @@ class RichTX {
 
   function setOptions(con) {
      /* sets the options with Javascript & CSS*/
-    var wh = 0; // wanted window height
-    const originalRatio = 700 / 460;
     opts = con.split(",");
     JS.doq("#CE1").style.fontFamily = opts[0]; // font family
     JS.doq("#CE1").style.fontSize = opts[1]; // font size
@@ -177,11 +175,6 @@ class RichTX {
     JS.doq("#CE1").style.lineHeight = opts[3]; // line height
     JS.doq("body").style.background = opts[4]; // body background
     JS.doq("#CE1").style.background = opts[5]; // CE background
-    // Calculate the new length for CE to keep the ratio close
-    wh = opts[7]; // (new) window height
-    const newCE = wh / originalRatio;
-    JS.doq("#CE1").style.height = "" + newCE + "px"; // CE height
-    JS.doq("#TA1").style.height = "" + newCE + "px"; // TA height
     JS.doq("#TA1").style.fontFamily = "Consolas";
   }
 
@@ -211,33 +204,40 @@ class RichTX {
   </script>
 
 <style>
-  body {
+  body html{
     background: white;
     height: 100%;
     margin: 0;
     padding: 0;
   }
-  #SAV {
-    color: red;
-    font: bold 12pt "Arial";
-  }
   #CE1 {
       padding: 5px;
-      width: 95%;
-      height: 400px;
       border: 1px solid navy;
-      margin: auto;
-      overflow: auto;
-      background: #fee;
+      margin: 6px;
+      box-sizing: border-box;
+    resize: vertical;
+    max-height: 78vh; /* adjust these as needed */
+    min-height: 78vh; /* adjust these as needed */
+    max-width: 98%; /* or any other desired maximum width */
+    flex: 1;
+    overflow-y: auto; /* add scrollbars if content overflows */
   }
   #TA1 {
       padding: 5px;
-      height: 400px; /*Note: must be same as #CE*/
-      width: 95%;  /*Note: must be same as #CE*/
+      margin: 6px;
       background: #111;
       color: lightgreen;
-      font-size: 11pt;
-      margin: auto;
+      font: normal 11pt "Consolas, Monospace";
+      box-sizing: border-box;
+    resize: vertical;
+    max-height: 50vh; /* adjust these as needed */
+    min-height: 78vh; /* adjust these as needed */
+    width: 98%; /* or any other desired maximum width */
+    flex: 1;
+  }
+  #SAV {
+    color: red;
+    font: bold 12pt "Arial";
   }
   .gfont {
     font-family: "Roboto Slab", serif;
@@ -283,10 +283,6 @@ class RichTX {
 </head>
 <body>
 
-<center><span class="gfont">Word Scriber</span></center>
-&nbsp;&nbsp;&nbsp;<input type="text" id="FN" size=50>
-<span id="SAV">Saved</span>
-<br>
 <dialog id="d2">
   <p>
     Text Color<br>
@@ -304,11 +300,12 @@ class RichTX {
     <input type="button" onclick="getColor('#c1','#d1')" value="Accept">
 </dialog>
 
-<div id="RTX1"> <!-- The document space -->
-
-</div><br><center>
-
-<div id="BTN">
+<center><span class="gfont">Word Scriber</span></center>
+&nbsp;&nbsp;&nbsp;<input type="text" id="FN" size=50>
+<span id="SAV">Saved</span>
+<br>
+<center>
+<div class="buttons">
   <img class="imgbutton" src="icons/open.png" title="Open File"
       onclick="openFile()" />&nbsp;
   <img class="imgbutton" src="icons/html.png"
@@ -333,62 +330,59 @@ class RichTX {
             title="font name" />&nbsp;
   <img class="imgbutton" src="icons/textcolor.png"
       onclick="JS.dlgOpen('#d1')" title="text color" />&nbsp;
-      <!-- onclick="RTXexec('foreColor', xxxxxxxxxx)" -->
-
   <img class="imgbutton" src="icons/indent.png" title="indent (Alt-i)"
       onclick="RTXexec('indent')" />&nbsp;
+  <img class="imgbutton" src="icons/outdent.png" title="outdent (Alt-o)"
+    onclick="RTXexec('outdent')" />&nbsp;
+  <img class="imgbutton" src="icons/image.png" title="Insert Image"
+    onclick="insertImage()" />&nbsp;
+  <img class="imgbutton" src="icons/highlighter.png" title="Hilite Color"
+    onclick="JS.dlgOpen('#d2');" />&nbsp;
+  <img class="imgbutton" src="icons/lists.png" title="List"
+    onclick="RTXexec('insertUnorderedList')" />&nbsp;
+  <img class="imgbutton" src="icons/format_list_numbered.png" title="Numbered List"
+    onclick="RTXexec('insertOrderedList')" />&nbsp;
   <br>
-    <img class="imgbutton" src="icons/save.png" title="Save (Ctrl-s)"
-      onclick="quicksaveDocument()" />&nbsp;
-    <img class="imgbutton" src="icons/image.png" title="Insert Image"
-      onclick="insertImage()" />&nbsp;
-    <img class="imgbutton" src="icons/highlighter.png" title="Hilite Color"
-      onclick="JS.dlgOpen('#d2');" />&nbsp;
-      <!-- onclick="RTXexec('hiliteColor', xxxxxxxxxxxxxxx)"-->
-
-    <img class="imgbutton" src="icons/lists.png" title="List"
-      onclick="RTXexec('insertUnorderedList')" />&nbsp;
-    <img class="imgbutton" src="icons/format_list_numbered.png" title="Numbered List"
-      onclick="RTXexec('insertOrderedList')" />&nbsp;
-    <img class="imgbutton" src="icons/format_align_left.png" title="Justify Left"
-      onclick="RTXexec('justifyLeft')" />&nbsp;
-    <img class="imgbutton" src="icons/format_align_center.png" title="Justify Center"
-      onclick="RTXexec('justifyCenter')" />&nbsp;
-    <img class="imgbutton" src="icons/format_align_right.png" title="Justify Right"
-      onclick="RTXexec('justifyRight')" />&nbsp;
-    <img class="imgbutton" src="icons/h1.png" title="heading size"
-      onclick="RTXexec('formatBlock', '<h1>')" />&nbsp;
-    <img class="imgbutton" src="icons/h2.png" title="heading size"
-      onclick="RTXexec('formatBlock', '<h2>')" />&nbsp;
-    <img class="imgbutton" src="icons/h3.png" title="heading size"
-      onclick="RTXexec('formatBlock', '<h3>')" />&nbsp;
-    <img class="imgbutton" src="icons/outdent.png" title="outdent (Alt-o)"
-      onclick="RTXexec('outdent')" />&nbsp;
-  <br>
-    <img class="imgbutton" src="icons/save_as.png" title="Save-As"
-      onclick="saveDocument()" />&nbsp;
-    <img class="imgbutton" src="icons/horizontal_rule.png" title="Horizontal Rule"
-      onclick="RTXexec('insertHorizontalRule')" />&nbsp;
-    <img class="imgbutton" src="icons/unformat.png" title="Remove Format"
-      onclick="RTXexec('removeFormat')" />&nbsp;
-    <img class="imgbutton" src="icons/table.png" title="insert Table"
-      onclick="generateTableHTML()" />&nbsp;
-    <img class="imgbutton" src="icons/fieldset.png" title="insert Fieldset"
-      onclick="generateFieldSet()" />&nbsp;
-    <img class="imgbutton" src="icons/files.png" title="manage files"
-      onclick="launch_filemgr()" />&nbsp;
-    <img class="imgbutton" src="icons/browse.png" title="Open in Browser"
-      onclick="launch_browser()" />&nbsp;
-    <img class="imgbutton" src="icons/settings.png" title="Options Edit"
-      onclick="launch_editor()" />&nbsp;
-    <img class="imgbutton" src="icons/spell.png" title="Spell Check"
-      onclick="getWords()" />&nbsp;
-    <img class="imgbutton" src="icons/close.png" title="Close Application"
-      onclick="getDocStatus()" />&nbsp;
+  <img class="imgbutton" src="icons/save.png" title="Save (Ctrl-s)"
+    onclick="quicksaveDocument()" />&nbsp;
+  <img class="imgbutton" src="icons/save_as.png" title="Save-As"
+    onclick="saveDocument()" />&nbsp;
+  <img class="imgbutton" src="icons/format_align_left.png" title="Justify Left"
+    onclick="RTXexec('justifyLeft')" />&nbsp;
+  <img class="imgbutton" src="icons/format_align_center.png" title="Justify Center"
+    onclick="RTXexec('justifyCenter')" />&nbsp;
+  <img class="imgbutton" src="icons/format_align_right.png" title="Justify Right"
+    onclick="RTXexec('justifyRight')" />&nbsp;
+  <img class="imgbutton" src="icons/h1.png" title="heading size"
+    onclick="RTXexec('formatBlock', '<h1>')" />&nbsp;
+  <img class="imgbutton" src="icons/h2.png" title="heading size"
+    onclick="RTXexec('formatBlock', '<h2>')" />&nbsp;
+  <img class="imgbutton" src="icons/h3.png" title="heading size"
+    onclick="RTXexec('formatBlock', '<h3>')" />&nbsp;
+  <img class="imgbutton" src="icons/horizontal_rule.png" title="Horizontal Rule"
+    onclick="RTXexec('insertHorizontalRule')" />&nbsp;
+  <img class="imgbutton" src="icons/unformat.png" title="Remove Format"
+    onclick="RTXexec('removeFormat')" />&nbsp;
+  <img class="imgbutton" src="icons/table.png" title="insert Table"
+    onclick="generateTableHTML()" />&nbsp;
+  <img class="imgbutton" src="icons/fieldset.png" title="insert Fieldset"
+    onclick="generateFieldSet()" />&nbsp;
+  <img class="imgbutton" src="icons/files.png" title="manage files"
+    onclick="launch_filemgr()" />&nbsp;
+  <img class="imgbutton" src="icons/browse.png" title="Open in Browser"
+    onclick="launch_browser()" />&nbsp;
+  <img class="imgbutton" src="icons/settings.png" title="Options Edit"
+    onclick="launch_editor()" />&nbsp;
+  <img class="imgbutton" src="icons/spell.png" title="Spell Check"
+    onclick="getWords()" />&nbsp;
+  <img class="imgbutton" src="icons/close.png" title="Close Application"
+    onclick="getDocStatus()" />&nbsp;
   <br>
 </div>
-
 </center>
+
+<div id="RTX1"> <!-- The document space -->
+</div>
 
 <script>
 /* create and display the RichTX area */
@@ -506,6 +500,12 @@ function generateFieldSet() {
 Rtx1.CEobj.addEventListener('focus', function(event) {
   JS.htm("#SAV", "Not Saved");  // assume user is going to modify the document
 });                             // could be better
+
+Rtx1.CEobj.addEventListener('keydown', function(event) {
+  // set 'Not Saved' message on keydowns
+  if (event.ctrlKey || event.altKey|| event.metaKey) return;
+  JS.htm("#SAV", "Not Saved");
+});
 
 window.addEventListener('keydown', function(event) {
   if ((event.ctrlKey || event.metaKey) && event.key === 's') {
