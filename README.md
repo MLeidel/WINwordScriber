@@ -33,11 +33,12 @@ __from command prompt:__
 - `pip install pywebview`
 
 __Install the Edge runtime__
--	MicrosoftEdgeWebView2RuntimeInstallerX64.exe
+-	MicrosoftEdgeWebView2RuntimeInstallerX64.exe  
+https://developer.microsoft.com/en-us/microsoft-edge/webview2/consumer/?form=MA13LH&ch=1
 
 __Lastly run:__
--	Setup_wsr.exe
-- or clone this repository
+- clone this repository  
+`python wsr.pyw`
 
 ---
 
@@ -46,4 +47,3 @@ provides communication between Python/tkinter and HTML/Javascript.
 
 
 ![alttext](images/wsr_git.png "wordScriber")
-
