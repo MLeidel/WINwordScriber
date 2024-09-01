@@ -1,0 +1,561 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset='UTF-8'>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+	<title>Word Scriber</title>
+  <script src="myJS.js"></script>
+  <script src="ulcase.js"></script>
+  <style>
+  @import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap');
+  </style>
+  <script>
+/* This class RichTX handles the setting up of the switchable contentEditable and textare
+blocks. Instantiate as many times as needed. It provides some useful methods.
+It is used like so:
+
+...
+
+<div id="RTX1"> <!-- The document block -->
+</div>
+
+<script>
+// Create and display the document block
+const Rtx1 = new RichTX("RTX1", "CE1", "TA1");
+Rtx1.displayAtTarget();
+
+...
+
+Note: this version is modified for "offline" application
+
+*/
+class RichTX {
+  constructor(target, ce, ta) {
+    this.target = target;
+    this.ce = ce;
+    this.ta = ta;
+  }
+
+  // method to display the text areas
+  displayAtTarget() {
+    var TG = document.getElementById(this.target);
+    TG.innerHTML = `
+  <textarea id="${this.ta}" wrap="on" style="display:none;" spellcheck="false"></textarea>
+  <div id="${this.ce}" contenteditable="true" spellcheck="false"></div>
+  `;
+    /*  These two objects are available to the developer for
+        access to the contentEditable and textarea widgets. */
+    this.CEobj = JS.doq(`#${this.ce}`);  // the contentEditable Object
+    this.TAobj = JS.doq(`#${this.ta}`);  // the textarea Object
+  }
+
+  // switch view HTML to text
+  switchView() {
+      /* toggles between textarea
+        and contentEditable
+        copying text and toggling display */
+      if (JS.gss(`#${this.ta}`, "display") == 'none') {
+          let txt = this.CEobj.innerHTML;
+          txt = this.fmthtml(txt);
+          this.CEobj.innerHTML = txt;
+      JS.val(`#${this.ta}`, this.CEobj.innerHTML); // HTML ==> TEXT
+      JS.tod(`#${this.ta}`, "block");
+      JS.tod(`#${this.ce}`, "block");
+      JS.doq(`#${this.ta}`).focus();
+      } else {
+          this.CEobj.innerHTML = JS.val(`#${this.ta}`); // TEXT ==> HTML
+          JS.tod(`#${this.ce}`, "block");
+          JS.tod(`#${this.ta}`, "block");
+          this.CEobj.focus();
+      }
+  }
+
+  fmthtml(t) {
+    /* formats the HTML when switching between text and CE
+       used in switchView method */
+      t = t.replace(/<div/g, "\n<div");
+      t = t.replace(/<br>/g, "<br>\n");
+      t = t.replace(/<\/div>/g, "\n</div>\n");
+      t = t.replace(/<\/blockquote>/g, "</blockquote>\n");
+      t = t.replace(/<blockquote/g, "\n<blockquote");
+      t = t.replace(/<\/span>/g, "</span>\n");
+      t = t.replace(/<span/g, "\n<span");
+      t = t.replace(/<ul/g, "\n<ul");
+      t = t.replace(/<ol/g, "\n<ol");
+      t = t.replace(/<\/ul>/g, "\n</ul>\n");
+      t = t.replace(/<\/ol>/g, "\n</ol>\n");
+      t = t.replace(/<li/g, "\n   <li");
+      t = t.replace(/\n\n/g, "\n"); // clean up extra blank lines
+      t = t.replace(/  /g, ""); // clean up extra spaces lines
+      t = t.replace(/\t/g, ""); // clean up extra tabs
+      return t;
+  }
+
+  /*  OBJ.setText(text) loads the contextEditable object  */
+  setText(t) {
+    /* set new content */
+    this.CEobj.innerHTML = t;
+  }
+
+  getText() {
+    /* return current content */
+      let txt = this.CEobj.innerHTML;
+      return txt;
+  }
+
+} // end of class  end of class  end of class  end of class
+
+  /*  RTXexec provides a wrapper around the execCommand function
+      Formatting commands are applied to what ever contentEditable
+      block has focus.
+  */
+  function RTXexec(com, data = null) {
+      let r = document.execCommand(com, false, data);
+      if (r === false) {
+        alert("Canceled, or Command invalid or not supported!");
+      }
+  }
+
+  // Javascript pywebview API functions
+
+  var opts;  // global array of options
+
+  function getFN() {
+     window.pywebview.api.getFileName().then(content => {
+        setFileName(content);
+     });
+  }
+
+  function openFile() {  // executes python/tkinter code
+     window.pywebview.api.open_file().then(content => {
+          loadDocument(content);
+     });
+  }
+
+  function saveFile(content) {  // executes python/tkinter code
+     window.pywebview.api.save_file(content).then(content => {
+        setFileName(content);; // which should be current_path from python
+     });
+  }
+
+  function quicksaveFile(content) {  // executes python/tkinter code
+     window.pywebview.api.quick_save_file(content).then(content => {
+        setFileName(content);; // which should be current_path from python
+     });
+  }
+
+  function getoptions() {  // executes python/tkinter code
+     window.pywebview.api.open_options().then(content => {
+         setOptions(content);
+     });
+  }
+
+  function on_close() {
+     window.pywebview.api.onClose();  // immediate close no ask
+  }
+
+  function setOptions(con) {
+     /* sets the options with Javascript & CSS*/
+    opts = con.split(",");
+    JS.doq("#CE1").style.fontFamily = opts[0]; // font family
+    JS.doq("#CE1").style.fontSize = opts[1]; // font size
+    JS.doq("#CE1").style.color = opts[2]; // font color
+    JS.doq("#CE1").style.lineHeight = opts[3]; // line height
+    JS.doq("body").style.background = opts[4]; // body background
+    JS.doq("#CE1").style.background = opts[5]; // CE background
+    JS.doq("#TA1").style.fontFamily = "Consolas";
+  }
+
+  function launch_editor() {
+     window.pywebview.api.open_editor();  // immediate close no ask
+  }
+
+  function launch_filemgr() {
+     window.pywebview.api.open_filemgr();  // immediate close no ask
+  }
+
+  function launch_browser() {
+      window.pywebview.api.open_browser();
+  }
+
+  function getDocStatus() {
+    // returns status to Python/webview
+    if (JS.htm("#SAV") == "") {
+      on_close();
+    } else {
+      if (confirm("Unsaved Document\nConfirm to close.")) {
+        on_close();
+      }
+    }
+  }
+
+  </script>
+
+<style>
+  body html{
+    background: white;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  #CE1 {
+      padding: 5px;
+      border: 1px solid navy;
+      margin: 6px;
+      box-sizing: border-box;
+    resize: vertical;
+    max-height: 78vh; /* adjust these as needed */
+    min-height: 78vh; /* adjust these as needed */
+    max-width: 98%; /* or any other desired maximum width */
+    flex: 1;
+    overflow-y: auto; /* add scrollbars if content overflows */
+  }
+  #TA1 {
+      padding: 5px;
+      margin: 6px;
+      background: #111;
+      color: lightgreen;
+      font: normal 11pt "Consolas, Monospace";
+      box-sizing: border-box;
+    resize: vertical;
+    max-height: 50vh; /* adjust these as needed */
+    min-height: 78vh; /* adjust these as needed */
+    width: 98%; /* or any other desired maximum width */
+    flex: 1;
+  }
+  #SAV, #MSG {
+    color: red;
+    font: bold 12pt "Arial";
+  }
+  .gfont {
+    font-family: "Roboto Slab", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 16pt;
+  }
+  input[type="button"] {
+    border: thin solid gray;
+    cursor: pointer;
+    border-radius: 7px;
+    margin-bottom: 7px;
+    /*width: 70px;*/
+    transition: background-color 0.3s;
+  }
+  input[type="button"]:hover {
+    background-color: white; /* Change this color to whatever you prefer */
+  }
+  .special {
+    background:Wheat;
+    color: DarkSlateGray;
+  }
+  .imgbutton {
+    vertical-align: middle;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    margin-bottom: 6px;
+    transition: background-color 0.4s;
+  }
+  .imgbutton:hover {
+    background-color: white;
+  }
+  dialog {
+    background: #ddd;
+    border: thin solid black;
+    border-radius: 10px;
+  }
+
+</style>
+
+</head>
+<body>
+
+<dialog id="d2">
+  <p>
+    Text Color<br>
+    click:
+    <input type="color" id="c2" value="#888899">
+  </p>
+    <input type="button" onclick="getColor('#c2','#d2')" value="Accept">
+</dialog>
+<dialog id="d1">
+  <p>
+    Highlight Color<br>
+    click:
+    <input type="color" id="c1" value="#888899">
+  </p>
+    <input type="button" onclick="getColor('#c1','#d1')" value="Accept">
+</dialog>
+
+<center><span class="gfont">Word Scriber</span></center>
+&nbsp;&nbsp;&nbsp;<input type="text" id="FN" size=50>
+<span id="SAV">Saved</span><span id="MSG"> </span>
+<br>
+<center>
+<div class="buttons">
+  <img class="imgbutton" src="icons/open.png" title="Open File"
+      onclick="openFile()" />&nbsp;
+  <img class="imgbutton" src="icons/html.png"
+      onclick="Rtx1.switchView()" title="toggle html" />&nbsp;
+  <img class="imgbutton" src="icons/bold.png" title="Bold Text (Ctrl-b)"
+      onclick="RTXexec('bold')" />&nbsp; <!--bold-->
+  <img class="imgbutton" src="icons/italic.png" title="italic (Ctrl-i)"
+      onclick="RTXexec('italic')" />&nbsp; <!--italic-->
+  <img class="imgbutton" src="icons/underline.png" title="underline (Ctrl-u)"
+      onclick="RTXexec('underline')" />&nbsp; <!--underline-->
+  <img class="imgbutton" src="icons/upper.png" title="uppercase (Alt-u)"
+      onclick="convertToUppercase()" />&nbsp;
+  <img class="imgbutton" src="icons/lower.png" title="lowercase (Alt-l)"
+      onclick="convertToLowercase()" />&nbsp;
+  <img class="imgbutton" src="icons/format_size.png" title="Text Size"
+      onclick="RTXexec('fontSize', ask('Enter Font Size (small) 1-7 (big)', 1))" />&nbsp;
+  <img class="imgbutton" src="icons/link_small.png"
+      onclick="RTXexec('createLink', ask('Enter URL for Link:', 5))"
+            title="Make Link" />&nbsp;
+  <img class="imgbutton" src="icons/fonts.png"
+      onclick="RTXexec('fontName', ask('Enter System Font Name:', 2))"
+            title="font name" />&nbsp;
+  <img class="imgbutton" src="icons/textcolor.png"
+      onclick="JS.dlgOpen('#d1')" title="text color" />&nbsp;
+  <img class="imgbutton" src="icons/indent.png" title="indent (Alt-i)"
+      onclick="RTXexec('indent')" />&nbsp;
+  <img class="imgbutton" src="icons/outdent.png" title="outdent (Alt-o)"
+    onclick="RTXexec('outdent')" />&nbsp;
+  <img class="imgbutton" src="icons/image.png" title="Insert Image"
+    onclick="insertImage()" />&nbsp;
+  <img class="imgbutton" src="icons/highlighter.png" title="Hilite Color"
+    onclick="JS.dlgOpen('#d2');" />&nbsp;
+  <img class="imgbutton" src="icons/lists.png" title="List"
+    onclick="RTXexec('insertUnorderedList')" />&nbsp;
+  <img class="imgbutton" src="icons/format_list_numbered.png" title="Numbered List"
+    onclick="RTXexec('insertOrderedList')" />&nbsp;
+  <br>
+  <img class="imgbutton" src="icons/save.png" title="Save (Ctrl-s)"
+    onclick="quicksaveDocument()" />&nbsp;
+  <img class="imgbutton" src="icons/save_as.png" title="Save-As"
+    onclick="saveDocument()" />&nbsp;
+  <img class="imgbutton" src="icons/format_align_left.png" title="Justify Left"
+    onclick="RTXexec('justifyLeft')" />&nbsp;
+  <img class="imgbutton" src="icons/format_align_center.png" title="Justify Center"
+    onclick="RTXexec('justifyCenter')" />&nbsp;
+  <img class="imgbutton" src="icons/format_align_right.png" title="Justify Right"
+    onclick="RTXexec('justifyRight')" />&nbsp;
+  <img class="imgbutton" src="icons/h1.png" title="heading size"
+    onclick="RTXexec('formatBlock', '<h1>')" />&nbsp;
+  <img class="imgbutton" src="icons/h2.png" title="heading size"
+    onclick="RTXexec('formatBlock', '<h2>')" />&nbsp;
+  <img class="imgbutton" src="icons/h3.png" title="heading size"
+    onclick="RTXexec('formatBlock', '<h3>')" />&nbsp;
+  <img class="imgbutton" src="icons/horizontal_rule.png" title="Horizontal Rule"
+    onclick="RTXexec('insertHorizontalRule')" />&nbsp;
+  <img class="imgbutton" src="icons/unformat.png" title="Remove Format"
+    onclick="RTXexec('removeFormat')" />&nbsp;
+  <img class="imgbutton" src="icons/table.png" title="insert Table"
+    onclick="generateTableHTML()" />&nbsp;
+  <img class="imgbutton" src="icons/fieldset.png" title="insert Fieldset"
+    onclick="generateFieldSet()" />&nbsp;
+  <img class="imgbutton" src="icons/files.png" title="manage files"
+    onclick="launch_filemgr()" />&nbsp;
+  <img class="imgbutton" src="icons/browse.png" title="Open in Browser"
+    onclick="launch_browser()" />&nbsp;
+  <img class="imgbutton" src="icons/settings.png" title="Options Edit"
+    onclick="launch_editor()" />&nbsp;
+  <img class="imgbutton" src="icons/spell.png" title="Spell Check"
+    onclick="spellCheck()" />&nbsp;
+  <img class="imgbutton" src="icons/close.png" title="Close Application"
+    onclick="getDocStatus()" />&nbsp;
+  <br>
+</div>
+</center>
+
+<div id="RTX1"> <!-- The document space -->
+</div>
+
+<script>
+/* create and display the RichTX area */
+
+const Rtx1 = new RichTX("RTX1", "CE1", "TA1");
+Rtx1.displayAtTarget();
+
+
+/* Hot Keys and helper functions */
+
+/* customized prompt handler */
+var askInx = new Array(10).fill(0); // array of last responses
+var askHead = "==============\n\n";
+/* input the message for prompt and an ID number
+  for future prompt defaults */
+function ask(msg, inx) {
+  if (askInx[inx] == 0) askInx[inx] = "";
+  let val = prompt(askHead + msg, askInx[inx]);
+  if (!val)
+    return false;
+  else {
+    askInx[inx] = val; // future default
+    return val;
+  }
+}
+
+function spellCheck() {
+  let ce = JS.doq("#CE1");
+  // ce.spellcheck = !ce.spellcheck;
+  if (ce.spellcheck) {
+    ce.spellcheck = false;
+    JS.htm("#MSG", "");
+  } else {
+    ce.spellcheck = true;
+    JS.htm("#MSG", "&nbsp;&nbsp;☼")
+  }
+  ce.blur();
+  ce.focus();
+}
+
+function insertImage() {
+  /* to insert a graphic use the insertHTML command ...
+     NOTE: the graphic must have an Internet URL */
+  let url = ask("Enter relative URL for image", 6);
+  if (url) RTXexec("insertHTML", `<img src='${url}' width=""  height=""  />`);
+}
+
+function getColor(cid, did) {
+  /* needs both color type ID and dialog ID */
+  var chosenColor = JS.val(cid);
+  //console.log('Chosen Color:', chosenColor);
+  // actions
+  if (did == "#d2") RTXexec('hiliteColor', chosenColor);
+  if (did == "#d1") RTXexec('foreColor', chosenColor);
+  // close the dialog
+  JS.doq(did).close();
+}
+
+/* File loading & Saving Logic */
+
+function setFileName(text) {
+  JS.val("#FN", text);
+  JS.htm("#SAV", "");
+}
+
+function quicksaveDocument() {
+  if (JS.val("#FN") == "docs/untitled.html") {
+    alert("First use Save-As");
+    return;
+  }
+  let text = Rtx1.getText();
+  quicksaveFile(text);
+  // quicksaveFile gets the filename and calls setFileName
+}
+
+function saveDocument() {
+  let text = Rtx1.getText();
+  saveFile(text);
+  // saveFile gets the filename and calls setFileName
+}
+
+function loadDocument(text) {
+  if (text == "") return;
+  Rtx1.setText(text);
+  getFN(); // Now get the filename from Python
+}
+
+function generateTableHTML() {
+    let tp = ask("Define table:\nrows,cols,border,space,padding\nlike 2,2,1,0,4", 7);
+    if (tp == null) return;
+    let prm = tp.split(",");
+
+    let tableHTML = `<table border=${prm[2]} cellspacing=${prm[3]} cellpadding=${prm[4]}>\n`;
+
+    for (let i = 0; i < prm[0]; i++) {
+        tableHTML += '  <tr>\n';
+        for (let j = 0; j < prm[1]; j++) {
+            tableHTML += '    <td>cell' + '</td>\n';
+        }
+        tableHTML += '  </tr>\n';
+    }
+
+    tableHTML += '</table>';
+    document.execCommand("insertHTML", false, tableHTML);
+}
+
+function generateFieldSet() {
+  let htmltext = `<fieldset style="display:inline;">\n<legend>legend</legend>\nbody<br><br><br><br>\n</fieldset>`
+  RTXexec('insertHTML', htmltext);
+}
+
+
+      /* Event Listeners */
+
+Rtx1.CEobj.addEventListener('focus', function(event) {
+  JS.htm("#SAV", "Not Saved");  // assume user is going to modify the document
+});                             // could be better
+
+Rtx1.CEobj.addEventListener('keydown', function(event) {
+  // set 'Not Saved' message on keydowns
+  if (event.ctrlKey || event.altKey|| event.metaKey) return;
+  JS.htm("#SAV", "Not Saved");
+});
+
+window.addEventListener('keydown', function(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 's') {
+      event.preventDefault();
+      quicksaveDocument();
+  }
+});
+
+window.addEventListener('keydown', function(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'q') {
+      event.preventDefault();
+      on_close();  // immediate close no ask
+  }
+});
+
+window.addEventListener('keydown', function(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
+    event.preventDefault();
+    launch_editor();
+  }
+});
+
+window.addEventListener('keydown', function(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'f') {
+    event.preventDefault();
+    launch_filemgr();
+  }
+});
+
+window.addEventListener('keydown', function(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'z') {
+    event.preventDefault();
+    RTXexec('undo');
+  }
+});
+
+window.addEventListener('keydown', function(event) {
+  if ((event.ctrlKey || event.metaKey) && event.key === 't') {
+    event.preventDefault();
+    RTXexec('redo');
+  }
+});
+
+Rtx1.CEobj.addEventListener('keydown', function(event) {
+  if (event.key === 'Tab') {
+    if (event.shiftKey) {
+      event.preventDefault();
+      RTXexec('outdent');
+    } else {
+      event.preventDefault();
+      RTXexec('indent');
+    }
+  }
+});
+
+
+Rtx1.setText("<html>");
+JS.val("#FN", "docs/untitled.html");
+JS.htm("#SAV", "");
+
+setTimeout(getoptions, 500); // timing issue with onload
+
+</script>
+</body>
+</html>

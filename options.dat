@@ -5,7 +5,7 @@
 = font size
 = font color
 = text line height
-= background color of app
+= background color of app (#00A3EE Windows Blue)
 = background color of editing area
 = text editor
 = file manager
@@ -14,7 +14,7 @@ Arial
 11pt
 #016
 125%
-#abc
+#00A3EE
 #dee
 notepad
 explorer
